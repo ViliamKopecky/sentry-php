@@ -35,6 +35,7 @@ class Raven_Client
      */
     public $context;
     public $extra_data;
+    public $custom_contexts;
     /**
      * @var array|null
      */
@@ -181,6 +182,7 @@ class Raven_Client
         $this->http_proxy = Raven_Util::get($options, 'http_proxy');
         $this->ignore_server_port = Raven_Util::get($options, 'ignore_server_port', false);
         $this->extra_data = Raven_Util::get($options, 'extra', array());
+        $this->custom_contexts = Raven_Util::get($options, 'custom_contexts', array());
         $this->send_callback = Raven_Util::get($options, 'send_callback', null);
         $this->curl_method = Raven_Util::get($options, 'curl_method', 'sync');
         $this->curl_path = Raven_Util::get($options, 'curl_path', 'curl');
@@ -910,6 +912,8 @@ class Raven_Client
         $runtime_context = array('version' => self::cleanup_php_version(), 'name' => 'php');
         $data['contexts']['runtime'] =  array_merge($runtime_context, $existing_runtime_context);
 
+        $data['contexts'] = array_merge($data['contexts'], $this->custom_contexts);
+
         if (!$this->breadcrumbs->is_empty()) {
             $data['breadcrumbs'] = $this->breadcrumbs->fetch();
         }
@@ -1480,6 +1484,16 @@ class Raven_Client
     public function extra_context($data)
     {
         $this->context->extra = array_merge($this->context->extra, $data);
+    }
+
+    /**
+     * Appends custom context.
+     *
+     * @param array $data Associative array of custom
+     */
+    public function custom_context($data)
+    {
+        $this->custom_contexts = array_merge($this->custom_contexts, $data);
     }
 
     /**
